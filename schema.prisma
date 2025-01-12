@@ -1,0 +1,149 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum JenisTransaksi {
+  QRIS
+  TRANSFER
+}
+
+enum Status {
+  LUNAS
+  BELUM_BAYAR
+}
+
+enum JenisDenda {
+  TERLAMBAT
+  HILANG
+}
+
+model user {
+  user_Id Int @id @default(autoincrement())
+  uuid String @unique
+  nama_user String @default("")
+  password String @default("")
+  tglPinjam String @default("")
+  CreatedAt DateTime @default(now())
+  batasPinjam String @default("")
+  UpdateAt DateTime @updatedAt
+  transaksi transaksi[]
+}
+model buku {
+  buku_Id Int @id @default(autoincrement())
+  tahun_terbit Int @default(0)
+  tgl_terbit String @default("")
+  jumlah Int @default(0)
+  judul String @default("")
+  jenis String @default("")
+  pengarang String @default("")
+  transaksi transaksi[]
+}
+model customer {
+  customer_Id Int @id @default(autoincrement())
+  uuid String @unique
+  customer_nama String @default("")
+  customer_alamat String @default("")
+  tglPinjam String @default("")
+  CreatedAt DateTime @default(now())
+  batasPinjam String @default("")
+  UpdatedAt DateTime @updatedAt
+  transaksi transaksi[]
+  denda denda[]
+  ulasan ulasan[]
+  jadwalPesanan JadwalPesanan[]
+  pengantaran pengantaran[]
+}
+
+model transaksi {
+  transaksi_Id Int @id @default(autoincrement())
+  uuid String @unique
+  tglPinjam String @default("")
+  CreatedAt DateTime @default(now())
+  batasPinjam String @default("")
+  UpdatedAt DateTime @updatedAt
+  jenis_transaksi JenisTransaksi @default(QRIS)
+  pajak String @default("")
+  statusBayar Status @default(BELUM_BAYAR)
+  total_harga Int @default(0)
+  user_id Int
+  user user @relation(fields: [user_id],references: [user_Id])
+  customer_Id Int 
+  customer customer @relation(fields: [customer_Id], references: [customer_Id])
+  buku_Id Int
+  buku buku @relation(fields: [buku_Id],references: [buku_Id])
+
+}
+
+model denda {
+  denda_Id Int @id @default(autoincrement())
+  customer_Id Int 
+  custumer customer @relation(fields: [customer_Id],references: [customer_Id])
+  tglPinjam String @default("")
+  CreatedAt DateTime @default(now())
+  batasPinjam String @default("")
+  UpdatedAt DateTime @updatedAt
+  kode_denda String @default("")
+  jenis_denda JenisDenda @default(TERLAMBAT)
+  tarif_denda Int @default(0)
+}
+
+model ulasan {
+  ulasan_Id Int @id @default(autoincrement())
+  customer_Id Int
+  customer customer @relation(fields: [customer_Id],references: [customer_Id])
+  customer_name String @default("")
+  Rating Int @default(0)
+  Pesan_Ulasan String? @db.Text
+}
+
+model JadwalPesanan {
+  jadwalPesanan_Id Int @id @default(autoincrement())
+  kurir_Id Int 
+  kurir kurir @relation(fields: [kurir_Id],references: [kurir_Id])
+  customer_id Int
+  customer customer @relation(fields: [customer_id],references: [customer_Id])
+  tglPinjam String @default("")
+  CreatedAt DateTime @default(now())
+  batasPinjam String @default("") 
+  UpdatedAt DateTime @updatedAt
+}
+
+model pengantaran {
+  pengantaran_id Int @id @default(autoincrement())
+  kurir_id Int
+  kurir kurir @relation(fields: [kurir_id], references: [kurir_Id]) 
+  customer_Id Int
+  customer customer @relation(fields: [customer_Id],references: [customer_Id])
+  alamat_customer String @default("")
+  customer_nama String @default("")
+}
+
+model kurir {
+  kurir_Id Int @id @default(autoincrement())
+  nomortelp Int @default(0)
+  alamat_kurir String @default("")
+  nama_kurir String @default("")
+  jadwalPesanan JadwalPesanan[]
+  pengantaran pengantaran[]
+  gaji gaji[]
+}
+
+model gaji {
+  gaji_Id Int @id @default(autoincrement())
+  kurir_Id Int 
+  kurir kurir @relation(fields: [kurir_Id],references: [kurir_Id])
+  nama_kurir String @default("")
+  pajak String @default("")
+
+}
