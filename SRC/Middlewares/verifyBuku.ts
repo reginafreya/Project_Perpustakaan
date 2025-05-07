@@ -5,18 +5,22 @@ const addDataSchema = Joi.object({
     judul: Joi.string().required(),
     pengarang: Joi.string().required(), 
     tahun_terbit: Joi.string().required(),
+    tgl_terbit: Joi.string().required(),
+    jenis: Joi.string().required(),
     stok: Joi.number().min(0).required(), 
-    harga_sewa: Joi.number().min(0).required(),
-    jenis: Joi.string().required()
+    harga_beli: Joi.number().min(0).required(),
+    harga_sewa: Joi.number().min(0).required()
 })
 
 const editDataSchema = Joi.object({
     judul: Joi.string().required(),
     pengarang: Joi.string().required(),
     tahun_terbit: Joi.string().required(),
+    tgl_terbit: Joi.string().required(),
+    jenis: Joi.string().required(),
     stok: Joi.number().min(0).required(),
+    harga_beli: Joi.number().min(0).required(),
     harga_sewa: Joi.number().min(0).required(),
-    jenis: Joi.string().required()
 })
 
 export const verifyAddBuku = (request: Request, response: Response, next: NextFunction) => {

@@ -57,7 +57,7 @@ export const createUser = async (request: Request, response: Response) => {
 export const updateUser = async (request: Request, response: Response ) => {
     try {
         const { id } = request.params
-        const {user_Id,nama_user, email, password, role} = request.body
+        const {user_Id, nama_user, email, password, role} = request.body
 
         const findUser = await prisma.user.findFirst({where: {user_Id: Number(id)}})
         if (!findUser) {
@@ -199,3 +199,44 @@ export const authentication = async(request:Request, response: Response) => {
  }
 
 }
+
+export const login = async (request: Request, response: Response) => {
+    try {
+        const { email, password } = request.body;
+
+        // Cari user berdasarkan email dan password (hashed dengan md5)
+        const findUser = await prisma.user.findFirst({
+            where: { email, password: md5(password) },
+        });
+
+        // Jika user tidak ditemukan, kirim pesan error
+        if (!findUser)
+            return response.status(401).json({
+                status: false,
+                logged: false,
+                message: "Email or password is invalid",
+            });
+
+        // Buat payload token
+        const data = {
+            id: findUser.user_Id,
+            name: findUser.nama_user,
+            email: findUser.email,
+            role: findUser.role,
+        };
+
+        const token = sign(data, SECRET || "token", { expiresIn: "1h" });
+
+        return response.status(200).json({
+            status: true,
+            logged: true,
+            message: "Login Success",
+            token,
+        });
+    } catch (error) {
+        return response.status(500).json({
+            status: false,
+            message: `There is an error. ${error}`,
+        });
+    }
+};

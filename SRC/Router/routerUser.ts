@@ -1,20 +1,21 @@
 import express from "express"
 import { getAllUser, createUser, updateUser, deleteUser, changeUserPicture, authentication} from "../Controller/controllerUser"
 import { verifyAddUser, verifyEditUser } from "../Middlewares/verifyUser"
-import uploadFile from "../Middlewares/userUpload"
 import { verifyAuthetication } from "../Middlewares/userValidation"
-import validateEmail from "../Middlewares/validateEmail"
+import { verifyRole, verifyToken } from "../Middlewares/authorization"
+import uploadFile from "../Middlewares/userUpload"
 
-const router = express()
-router.use(express.json())
+const app = express()
+app.use(express.json())
 
-router.get(`/`,getAllUser)
-router.post(`/`,[verifyAddUser],createUser)
-router.put(`/:id`,[verifyEditUser],updateUser)
-router.put(`/picUser/:id`,[uploadFile.single("picture"), changeUserPicture])
-router.delete(`/:id`, deleteUser)
+app.get(`/`, [verifyToken, verifyRole(["MANAGER"])], getAllUser)
+app.put('/:id', [verifyToken, verifyRole(["MANAGER"])], [uploadFile.single("profile_picture"), verifyEditUser], updateUser)
+app.put(`/picUser/:id`, [verifyToken, verifyRole(["MANAGER"])], [uploadFile.single("profile_picture"), changeUserPicture])
+app.delete(`/:id`, [verifyToken, verifyRole(["MANAGER"])], deleteUser)
 
-router.post(`/create`, [validateEmail],createUser)
-router.post(`/login`, [validateEmail,verifyAuthetication], authentication)
+app.post(`/login`, [verifyAuthetication], authentication)
+app.post('/', [uploadFile.single("profile_picture"), verifyAddUser],createUser)
 
-export default router
+// app.post(`/create`,[validateEmail], createUser)
+
+export default app

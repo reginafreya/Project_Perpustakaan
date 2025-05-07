@@ -32,13 +32,12 @@ export const getAllBuku = async ( request: Request, response: Response ) => {
 
 export const createBuku = async (request: Request, response: Response) => {
     try{
-        const {judul, pengarang, tahun_terbit, stok, harga_sewa, jenis} = request.body
+        const {judul, pengarang, tahun_terbit, tgl_terbit,jenis, stok, harga_beli, harga_sewa } = request.body
         const uuid = uuidv4()
 
         const newBuku = await prisma.buku.create({
-            data: { uuid, judul, pengarang, tahun_terbit, stok, harga_sewa: Number(harga_sewa), jenis }
+            data: { uuid, judul, pengarang, tahun_terbit, tgl_terbit, jenis, stok, harga_beli: Number(harga_beli), harga_sewa: Number(harga_sewa) }
         })
-
         return response.json({
             status: true,
             data: newBuku,
@@ -56,7 +55,7 @@ export const createBuku = async (request: Request, response: Response) => {
 export const updateBuku = async (request: Request, response: Response) => {
     try {
         const { id } = request.params
-        const { judul, pengarang, tahun_terbit, stok, harga_sewa, jenis } = request.body
+        const { judul, pengarang, tahun_terbit, tgl_terbit,jenis, stok, harga_beli, harga_sewa } = request.body
 
         const findBuku = await prisma.buku.findFirst({where: {buku_Id: Number(id)}})
         if (!findBuku) {
@@ -70,9 +69,11 @@ export const updateBuku = async (request: Request, response: Response) => {
                 judul: judul || findBuku.judul,
                 pengarang: pengarang || findBuku.pengarang,
                 tahun_terbit: tahun_terbit || findBuku.tahun_terbit,
+                tgl_terbit: tgl_terbit || findBuku.tgl_terbit,
+                jenis: jenis || findBuku.jenis,
                 stok: stok ? Number(stok) : findBuku.stok,
-                harga_sewa: harga_sewa ? Number(harga_sewa) : findBuku.harga_sewa,
-                jenis: jenis || findBuku.jenis
+                harga_beli: harga_beli? Number(harga_beli) : findBuku.harga_beli,
+                harga_sewa: harga_sewa ? Number(harga_sewa) : findBuku.harga_sewa
             },
             where: {buku_Id: Number(id)}
         })
